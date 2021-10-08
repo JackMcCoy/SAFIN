@@ -3,7 +3,7 @@ import random
 from importlib import import_module
 from pathlib import Path
 
-import os
+import os, re
 import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
@@ -122,7 +122,7 @@ if __name__ == '__main__':
         print("Loading state after {:d} iterations".format(args.start_iter + 0))
         states = torch.load(save_dir / 'ckpt_iter_{:d}.pth.tar'.format(args.start_iter))
         for key in list(states['decoder_state_dict'].keys()):
-            if 'pool' in key:
+            if len(re.findall('LL|LH|HL|HH',key))>0:
                 del (states['decoder_state_dict'][key])
         network.decoder.load_state_dict(states['decoder_state_dict'],strict=False)
         network.safin4.load_state_dict(states['safin4_state_dict'],strict=False)
