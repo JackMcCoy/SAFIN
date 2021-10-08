@@ -12,7 +12,7 @@ import torch.utils.data as data
 from PIL import Image, ImageFile
 from tensorboardX import SummaryWriter
 from torchvision import transforms
-from torchvision.utils import make_grid
+from torchvision.utils import make_grid, save_image
 from tqdm import tqdm
 
 from sampler import InfiniteSamplerWrapper
@@ -184,9 +184,8 @@ if __name__ == '__main__':
                 reference_img_grid = make_grid(style_images, nrow=4, normalize=True, scale_each=True)
                 content_img_grid = make_grid(content_images, nrow=4, normalize=True, scale_each=True)
 
-                writer.add_image('styled_images', styled_img_grid, i)
-                writer.add_image('reference_images', reference_img_grid, i)
-                writer.add_image('content_images', content_img_grid, i)
+                writer.save_image(styled_img_grid.detach(), args.save_dir+'/drafting_training_iter'+str(i+1)+'.jpg')
+                writer.save_image(content_img_grid.detach(), , args.save_dir+'/drafting_training_content_iter'+str(i+1)+'.jpg')
         if (i + 1) % args.save_model_interval == 0 or (i + 1) == args.max_iter or i == 0:
             if hasattr(network, 'safin4'):
                 states = {
