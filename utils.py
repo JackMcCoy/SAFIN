@@ -38,10 +38,10 @@ def get_wav(in_channels, pool=True):
     HL.weight.requires_grad = False
     HH.weight.requires_grad = False
 
-    LL.weight.data = filter_LL.float().unsqueeze(0).clone().expand(in_channels, -1, -1, -1)
-    LH.weight.data = filter_LH.float().unsqueeze(0).clone().expand(in_channels, -1, -1, -1)
-    HL.weight.data = filter_HL.float().unsqueeze(0).clone().expand(in_channels, -1, -1, -1)
-    HH.weight.data = filter_HH.float().unsqueeze(0).clone().expand(in_channels, -1, -1, -1)
+    LL.weight.data = filter_LL.float().unsqueeze(0).expand(in_channels, -1, -1, -1)
+    LH.weight.data = filter_LH.float().unsqueeze(0).expand(in_channels, -1, -1, -1)
+    HL.weight.data = filter_HL.float().unsqueeze(0).expand(in_channels, -1, -1, -1)
+    HH.weight.data = filter_HH.float().unsqueeze(0).expand(in_channels, -1, -1, -1)
     return LL, LH, HL, HH
 
 

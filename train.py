@@ -180,9 +180,9 @@ if __name__ == '__main__':
                 else :
                     output = style_transfer(vgg, network.decoder, content_images, style_images, \
                                             1.0, None)
-                styled_img_grid = make_grid(output, nrow=4, normalize=True, scale_each=True)
-                reference_img_grid = make_grid(style_images, nrow=4, normalize=True, scale_each=True)
-                content_img_grid = make_grid(content_images, nrow=4, normalize=True, scale_each=True)
+                styled_img_grid = make_grid(output, nrow=4, scale_each=True)
+                reference_img_grid = make_grid(style_images, nrow=4, scale_each=True)
+                content_img_grid = make_grid(content_images, nrow=4, scale_each=True)
 
                 save_image(styled_img_grid.detach(), args.save_dir+'/drafting_training_iter'+str(i+1)+'.jpg')
                 save_image(content_img_grid.detach(), args.save_dir+'/drafting_training_content_iter'+str(i+1)+'.jpg')
