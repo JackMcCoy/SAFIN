@@ -184,8 +184,8 @@ if __name__ == '__main__':
                 reference_img_grid = make_grid(style_images, nrow=4, normalize=True, scale_each=True)
                 content_img_grid = make_grid(content_images, nrow=4, normalize=True, scale_each=True)
 
-                writer.save_image(styled_img_grid.detach(), args.save_dir+'/drafting_training_iter'+str(i+1)+'.jpg')
-                writer.save_image(content_img_grid.detach(), args.save_dir+'/drafting_training_content_iter'+str(i+1)+'.jpg')
+                save_image(styled_img_grid.detach(), args.save_dir+'/drafting_training_iter'+str(i+1)+'.jpg')
+                save_image(content_img_grid.detach(), args.save_dir+'/drafting_training_content_iter'+str(i+1)+'.jpg')
         if (i + 1) % args.save_model_interval == 0 or (i + 1) == args.max_iter or i == 0:
             if hasattr(network, 'safin4'):
                 states = {
