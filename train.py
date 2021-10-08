@@ -196,6 +196,8 @@ if __name__ == '__main__':
                 content_img_grid = make_grid(content_images, nrow=4, scale_each=True)
 
                 save_image(styled_img_grid.detach(), args.save_dir+'/drafting_training_iter'+str(i+1)+'.jpg')
+                save_image(reference_img_grid.detach(),
+                           args.save_dir + '/drafting_training_style_iter' + str(i + 1) + '.jpg')
                 save_image(content_img_grid.detach(), args.save_dir+'/drafting_training_content_iter'+str(i+1)+'.jpg')
         if (i + 1) % args.save_model_interval == 0 or (i + 1) == args.max_iter or i == 0:
             if hasattr(network, 'safin4'):
