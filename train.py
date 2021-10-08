@@ -170,6 +170,23 @@ if __name__ == '__main__':
         writer.add_scalar('loss_content', loss_c.item(), i + 1)
         writer.add_scalar('loss_style', loss_s.item(), i + 1)
 
+        if (i + 1) % 100 ==0:
+            with torch.no_grad():
+                network.eval()
+                if hasattr(network, 'safin4'):
+                    safin_list = [network.safin3, network.safin4]
+                    output = style_transfer(vgg, network.decoder, content_images, style_images, \
+                                            1.0, safin_list)
+                else :
+                    output = style_transfer(vgg, network.decoder, content_images, style_images, \
+                                            1.0, None)
+                styled_img_grid = make_grid(output, nrow=4, normalize=True, scale_each=True)
+                reference_img_grid = make_grid(style_images, nrow=4, normalize=True, scale_each=True)
+                content_img_grid = make_grid(content_images, nrow=4, normalize=True, scale_each=True)
+
+                writer.add_image('styled_images', styled_img_grid, i)
+                writer.add_image('reference_images', reference_img_grid, i)
+                writer.add_image('content_images', content_img_grid, i)
         if (i + 1) % args.save_model_interval == 0 or (i + 1) == args.max_iter or i == 0:
             if hasattr(network, 'safin4'):
                 states = {
