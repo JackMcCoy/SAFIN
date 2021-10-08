@@ -113,10 +113,8 @@ if __name__ == '__main__':
     vgg = net.WaveEncoder()
     vstate = torch.load(args.vgg)
     for key in vstate.keys():
-        if 'pool' in key:
-            print(key)
-            vstate[key] = vstate[key].clone()
-    vgg.load_state_dict(vstate.clone())
+        vstate[key] = vstate[key].clone()
+    vgg.load_state_dict(vstate)
     network = net.Net(vgg, decoder)
 
     if args.start_iter > 0:
