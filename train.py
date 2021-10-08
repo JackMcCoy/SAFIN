@@ -116,7 +116,7 @@ if __name__ == '__main__':
         if 'pool' in key:
             print(key)
             vstate[key] = vstate[key].clone()
-    vgg.load_state_dict(vstate)
+    vgg.load_state_dict(vstate.clone())
     network = net.Net(vgg, decoder)
 
     if args.start_iter > 0:
