@@ -209,7 +209,7 @@ class Net(nn.Module):
             sX, _ = xdog(style.detach(), gaus_1, gaus_2, morph, gamma=.9, morph_cutoff=8.85, morphs=1)
             cXF = self.encoder(cX)
             sXF = self.encoder(sX)
-            stylized_dog, _ = xdog(torch.clip(stylized, min=0, max=1), gaus_1, gaus_2, morph,
+            stylized_dog, _ = xdog(torch.clip(g_t, min=0, max=1), gaus_1, gaus_2, morph,
                                    gamma=.9, morph_cutoff=8.85, morphs=1)
             cdogF = self.encoder(stylized_dog)
 
