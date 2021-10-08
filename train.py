@@ -155,7 +155,7 @@ if __name__ == '__main__':
         params = list(network.decoder.parameters())+list(network.safin4.parameters())+\
         list(network.safin3.parameters())
         base_optimizer = torch.optim.Adam
-        optimizer = SAM(params, base_optimizer, lr=args.lr, momentum=0.9)
+        optimizer = SAM(params, base_optimizer, lr=args.lr)
         print('=> training safin')
 
     for i in tqdm(range(args.max_iter)):
