@@ -48,7 +48,12 @@ def get_wav(in_channels, pool=True):
 class WavePool(nn.Module):
     def __init__(self, in_channels):
         super(WavePool, self).__init__()
-        self.LL, self.LH, self.HL, self.HH = get_wav(in_channels)
+        wave = get_wav(in_channels)
+        print(wave)
+        self.LL = wave[0]
+        self.LH = wave[1]
+        self.HL = wave[2]
+        self.HH = wave[3]
 
     def forward(self, x):
         return self.LL(x), self.LH(x), self.HL(x), self.HH(x)
