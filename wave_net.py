@@ -204,7 +204,7 @@ class Net(nn.Module):
         for i in range(1, 4):
             loss_s += self.calc_style_loss(g_t_feats[i], style_feats[i])
 
-        if mdog_losses:
+        if self.mdog_losses:
             cX, _ = xdog(content.detach(), gaus_1, gaus_2, morph, gamma=.9, morph_cutoff=8.85, morphs=1)
             sX, _ = xdog(style.detach(), gaus_1, gaus_2, morph, gamma=.9, morph_cutoff=8.85, morphs=1)
             cXF = self.encoder(cX)
