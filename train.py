@@ -154,7 +154,7 @@ if __name__ == '__main__':
     if hasattr(network, 'safin4'):
         params = list(network.decoder.parameters())+list(network.safin4.parameters())+\
         list(network.safin3.parameters())
-        base_optimizer = torch.optim.Adam(params, lr=args.lr)
+        base_optimizer = torch.optim.Adam
         optimizer = SAM(params, base_optimizer, lr=args.lr, momentum=0.9)
         print('=> training safin')
 
