@@ -8,6 +8,7 @@ import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
 import torch.utils.data as data
+from sam import SAM
 
 from PIL import Image, ImageFile
 from tensorboardX import SummaryWriter
@@ -153,7 +154,8 @@ if __name__ == '__main__':
     if hasattr(network, 'safin4'):
         params = list(network.decoder.parameters())+list(network.safin4.parameters())+\
         list(network.safin3.parameters())
-        optimizer = torch.optim.Adam(params, lr=args.lr)
+        base_optimizer = torch.optim.Adam(params, lr=args.lr)
+        optimizer = SAM(params, base_optimizer, lr=args.lr, momentum=0.9)
         print('=> training safin')
 
     for i in tqdm(range(args.max_iter)):
@@ -166,9 +168,15 @@ if __name__ == '__main__':
         loss_s = args.style_weight * loss_s
         loss = loss_c + loss_s
 
-        optimizer.zero_grad()
         loss.backward()
-        optimizer.step()
+        optimizer.first_step(zero_grad=True)
+
+        loss_c, loss_s = network(content_images, style_images)
+        loss_c = args.content_weight * loss_c
+        loss_s = args.style_weight * loss_s
+        loss = loss_c + loss_s
+        loss.backward()
+        optimizer.second_step(zero_grad=True)
 
         writer.add_scalar('loss_content', loss_c.item(), i + 1)
         writer.add_scalar('loss_style', loss_s.item(), i + 1)
