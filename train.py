@@ -121,9 +121,9 @@ if __name__ == '__main__':
     if args.start_iter > 0:
         print("Loading state after {:d} iterations".format(args.start_iter + 0))
         states = torch.load(save_dir / 'ckpt_iter_{:d}.pth.tar'.format(args.start_iter))
-        network.decoder.load_state_dict(states['decoder_state_dict'])
-        network.safin4.load_state_dict(states['safin4_state_dict'])
-        network.safin3.load_state_dict(states['safin3_state_dict'])
+        network.decoder.load_state_dict(states['decoder_state_dict'],strict=False)
+        network.safin4.load_state_dict(states['safin4_state_dict'],strict=False)
+        network.safin3.load_state_dict(states['safin3_state_dict'],strict=False)
 
     network.train()
     network.to(device)
