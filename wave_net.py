@@ -213,8 +213,8 @@ class Net(nn.Module):
                                    gamma=.9, morph_cutoff=8.85, morphs=1)
             cdogF = self.encoder(stylized_dog)
 
-            mxdog_content = self.calc_content_loss(stylized_feats[-2], cXF[-2]) + self.calc_content_loss(
-                stylized_feats[-1], cXF[-1])
+            mxdog_content = self.calc_content_loss(g_t_feats[-2], cXF[-2]) + self.calc_content_loss(
+                g_t_feats[-1], cXF[-1])
             mxdog_content_contraint = self.calc_content_loss(cdogF[-2], cXF[-2]) + self.calc_content_loss(
                 cdogF[-1], cXF[-1])
             mxdog_style = self.calc_gram_error(cdogF[-2], sXF[-2]) + self.calc_gram_error(cdogF[-1],
