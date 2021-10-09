@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
     network.train()
     network.to(device)
-    disc_ = Discriminator(depth=5, num_channels=32)
+    disc_ = Discriminator(depth=5, num_channels=32, device=device)
     disc_.train()
     disc_.to(device)
     set_requires_grad(disc_, False)

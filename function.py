@@ -116,7 +116,8 @@ class GANLoss(nn.Module):
                  gan_mode,
                  target_real_label=1.0,
                  target_fake_label=0.0,
-                 loss_weight=1.0):
+                 loss_weight=1.0,
+                 device=None):
         super(GANLoss, self).__init__()
         # when loss weight less than zero return None
         if loss_weight <= 0:
@@ -125,6 +126,7 @@ class GANLoss(nn.Module):
         self.target_real_label = target_real_label
         self.target_fake_label = target_fake_label
         self.loss_weight = loss_weight
+        self.device = device
 
         self.gan_mode = gan_mode
         if gan_mode == 'lsgan':
@@ -141,13 +143,13 @@ class GANLoss(nn.Module):
             if not hasattr(self, 'target_real_tensor'):
                 self.target_real_tensor = torch.full(
                     prediction.shape,
-                    fill_value=self.target_real_label).float().to(device)
+                    fill_value=self.target_real_label).float().to(self.device)
             target_tensor = self.target_real_tensor
         else:
             if not hasattr(self, 'target_fake_tensor'):
                 self.target_fake_tensor = torch.full(
                     prediction.shape,
-                    fill_value=self.target_fake_label).float().to(device)
+                    fill_value=self.target_fake_label).float().to(self.device)
             target_tensor = self.target_fake_tensor
 
         return target_tensor
