@@ -34,7 +34,7 @@ def prepare_seed(rand_seed):
 
 def train_transform():
     transform_list = [
-        transforms.Resize(size=(128,128)),
+        transforms.Resize(size=128),
         transforms.RandomCrop(128),
         transforms.ToTensor()
     ]
