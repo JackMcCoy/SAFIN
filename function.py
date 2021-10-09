@@ -11,6 +11,16 @@ def calc_mean_std(feat, eps=1e-5):
     feat_mean = feat.view(N, C, -1).mean(dim=2).view(N, C, 1, 1)
     return feat_mean, feat_std
 
+def calc_emd_loss(pred, target):
+    b, _, h, w = pred.shape
+    pred = pred.reshape([b, -1, w * h])
+    pred_norm = torch.sqrt((pred**2).sum(1).reshape([b, -1, 1]))
+    pred = pred.transpose(2, 1)
+    target_t = target.reshape([b, -1, w * h])
+    target_norm = torch.sqrt((target**2).sum(1).reshape([b, 1, -1]))
+    similarity = torch.bmm(pred, target_t) / pred_norm / target_norm
+    dist = 1. - similarity
+    return dist
 
 def adaptive_instance_normalization(content_feat, style_feat):
     assert (content_feat.size()[:2] == style_feat.size()[:2])

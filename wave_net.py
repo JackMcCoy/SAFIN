@@ -1,7 +1,7 @@
 import torch.nn as nn
+import torch
 from utils import *
-from function import SAFIN
-from function import calc_mean_std
+from function import SAFIN, calc_mean_std, calc_emd_loss
 from gaussian_diff import xdog, make_gaussians
 
 gaus_1, gaus_2, morph = make_gaussians(torch.device('cuda'))
@@ -172,6 +172,23 @@ class Net(nn.Module):
         return self.mse_loss(input_mean, target_mean) + \
                self.mse_loss(input_std, target_std)
 
+    def calc_style_emd_loss(self,input, target):
+        CX_M = calc_emd_loss(input, target)
+        m1, _ = CX_M.min(2)
+        m2, _ = CX_M.min(1)
+        loss_remd = torch.max(torch.mean(m1), torch.mean(m2))
+        return loss_remd
+
+    def calc_content_relt_loss(self, input, target):
+        dM = 1.
+        Mx = calc_emd_loss(input, input)
+        Mx = Mx / (Mx.sum(1, keepdim=True))
+        My = calc_emd_loss(target, target)
+        My = My / (My.sum(1, keepdim=True))
+        loss_content = torch.abs(
+            dM * (Mx - My)).mean() * input.shape[2] * input.shape[3]
+        return loss_content
+
     def gram_matrix(self,input):
         a, b, c, d = input.shape
 
@@ -203,6 +220,9 @@ class Net(nn.Module):
         loss_s = self.calc_style_loss(g_t_feats[0], style_feats[0])
         for i in range(1, 4):
             loss_s += self.calc_style_loss(g_t_feats[i], style_feats[i])
+        style_emd = self.calc_style_emd_loss(g_t_feats[-2],style_feats[-2]) + \
+                    self.calc_style_emd_loss(g_t_feats[-1], style_feats[-1])
+        content_relt = self.calc_content_relt_loss(g_t_feats[-1], content_feat[-1])
 
         if self.mdog_losses:
             cX, _ = xdog(content.detach(), gaus_1, gaus_2, morph, gamma=.9, morph_cutoff=8.85, morphs=1)
@@ -223,4 +243,4 @@ class Net(nn.Module):
         else:
             mxdog_losses = 0
 
-        return loss_c, loss_s, mxdog_losses
+        return loss_c, loss_s, style_emd, content_relt, mxdog_losses

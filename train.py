@@ -163,17 +163,17 @@ if __name__ == '__main__':
         content_images = next(content_iter).to(device)
         style_images = next(style_iter).to(device)
         network.train()
-        loss_c, loss_s, mxdog = network(content_images, style_images)
-        loss_c = args.content_weight * loss_c
-        loss_s = args.style_weight * loss_s
+        loss_c, loss_s, style_emd, content_relt, mxdog = network(content_images, style_images)
+        loss_c = args.content_weight * loss_c + content_relt * 16
+        loss_s = args.style_weight * (loss_s + 3 * style_emd)
         loss = loss_c + loss_s + mxdog
 
         loss.backward()
         optimizer.first_step(zero_grad=True)
 
-        loss_c, loss_s, mxdog = network(content_images, style_images)
-        loss_c = args.content_weight * loss_c
-        loss_s = args.style_weight * loss_s
+        loss_c, loss_s, style_emd, content_relt, mxdog = network(content_images, style_images)
+        loss_c = args.content_weight * loss_c + content_relt * 16
+        loss_s = args.style_weight * (loss_s + 3 * style_emd)
         loss = loss_c + loss_s + mxdog
         loss.backward()
         optimizer.second_step(zero_grad=True)
