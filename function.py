@@ -104,7 +104,128 @@ class SAFIN(nn.Module):
             return shared_affine_feat
         output = shared_affine_feat * style_gamma + style_beta
         return output
-        
+
+
+class GANLoss(nn.Module):
+    """Define different GAN objectives.
+
+    The GANLoss class abstracts away the need to create the target label tensor
+    that has the same size as the input.
+    """
+    def __init__(self,
+                 gan_mode,
+                 target_real_label=1.0,
+                 target_fake_label=0.0,
+                 loss_weight=1.0):
+        super(GANLoss, self).__init__()
+        # when loss weight less than zero return None
+        if loss_weight <= 0:
+            return None
+
+        self.target_real_label = target_real_label
+        self.target_fake_label = target_fake_label
+        self.loss_weight = loss_weight
+
+        self.gan_mode = gan_mode
+        if gan_mode == 'lsgan':
+            self.loss = nn.MSELoss()
+        elif gan_mode == 'vanilla':
+            self.loss = nn.BCEWithLogitsLoss()
+        elif gan_mode in ['wgan', 'wgangp', 'hinge', 'logistic']:
+            self.loss = None
+        else:
+            raise NotImplementedError('gan mode %s not implemented' % gan_mode)
+
+    def get_target_tensor(self, prediction, target_is_real):
+        if target_is_real:
+            if not hasattr(self, 'target_real_tensor'):
+                self.target_real_tensor = torch.full(
+                    prediction.shape,
+                    fill_value=self.target_real_label).float().to(device)
+            target_tensor = self.target_real_tensor
+        else:
+            if not hasattr(self, 'target_fake_tensor'):
+                self.target_fake_tensor = torch.full(
+                    prediction.shape,
+                    fill_value=self.target_fake_label).float().to(device)
+            target_tensor = self.target_fake_tensor
+
+        return target_tensor
+
+    def __call__(self,
+                 prediction,
+                 target_is_real,
+                 is_disc=False,
+                 is_updating_D=None):
+        if self.gan_mode in ['lsgan', 'vanilla']:
+            target_tensor = self.get_target_tensor(prediction, target_is_real)
+            loss = self.loss(prediction, target_tensor)
+        elif self.gan_mode.find('wgan') != -1:
+            if target_is_real:
+                loss = -prediction.mean()
+            else:
+                loss = prediction.mean()
+        elif self.gan_mode == 'hinge':
+            if target_is_real:
+                loss = F.relu(1 - prediction) if is_updating_D else -prediction
+            else:
+                loss = F.relu(1 + prediction) if is_updating_D else prediction
+            loss = loss.mean()
+        elif self.gan_mode == 'logistic':
+            if target_is_real:
+                loss = F.softplus(-prediction).mean()
+            else:
+                loss = F.softplus(prediction).mean()
+
+        return loss if is_disc else loss * self.loss_weight
+
+
+class Discriminator(nn.Module):
+    def __init__(self, depth=5, num_channels=64):
+        super(Discriminator, self).__init__()
+        self.head = nn.Sequential(
+            nn.Conv2d(3,num_channels,3,stride=1,padding=1),
+            nn.BatchNorm2d(num_channels),
+            nn.LeakyReLU(0.2)
+            )
+        self.body = []
+        for i in range(depth - 2):
+            self.body.append(
+                nn.Conv2d(num_channels,
+                          num_channels,
+                          kernel_size=3,
+                          stride=1,
+                          padding=1))
+            self.body.append(nn.BatchNorm2d(num_channels))
+            self.body.append(nn.LeakyReLU(0.2))
+        self.body = nn.Sequential(*self.body)
+        self.tail = nn.Conv2d(num_channels,
+                              1,
+                              kernel_size=3,
+                              stride=1,
+                              padding=1)
+        self.ganloss = GANLoss('lsgan')
+
+    def losses(self, real, fake):
+        pred_real = self(real)
+        loss_D_real = self.ganloss(pred_real, True)
+        pred_fake = self(fake)
+        loss_D_fake = self.ganloss(pred_fake, False)
+        loss_D = (loss_D_real + loss_D_fake) * 0.5
+        return loss_D
+
+    @torch.no_grad()
+    def gradients(self):
+        for p in self.parameters():
+            if p.grad is None:
+                continue
+            yield p
+
+    def forward(self, x):
+        x = self.head(x)
+        x = self.body(x)
+        x = self.tail(x)
+        return x
 
 def _calc_feat_flatten_mean_std(feat):
     # takes 3D feat (C, H, W), return mean and std of array within channels

@@ -201,7 +201,7 @@ class Net(nn.Module):
         gram_target = torch.clip(self.gram_matrix(target), min = 0, max = 1)
         return torch.clip(self.mse_loss(gram_pred, gram_target), min = 0, max = 1)
 
-    def forward(self, content, style, alpha=1.0, output_shared=False):
+    def forward(self, content, style, disc_, disc_loss=True, alpha=1.0, output_shared=False):
         assert 0 <= alpha <= 1
         content_skips = {}
         style_feats = self.encoder(style)
@@ -243,4 +243,10 @@ class Net(nn.Module):
         else:
             mxdog_losses = 0
 
-        return loss_c, loss_s, style_emd, content_relt, mxdog_losses
+        if disc_loss:
+            pred_fake_p = disc_(g_t)
+            loss_Gp_GAN = disc_.ganloss(pred_fake_p, True).data
+        else:
+            loss_Gp_GAN = 0
+
+        return g_t, loss_c, loss_s, style_emd, content_relt, mxdog_losses, loss_Gp_GAN

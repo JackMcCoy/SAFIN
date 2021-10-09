@@ -15,6 +15,7 @@ from tensorboardX import SummaryWriter
 from torchvision import transforms
 from torchvision.utils import make_grid, save_image
 from tqdm import tqdm
+from function import Discriminator
 
 from sampler import InfiniteSamplerWrapper
 from test import style_transfer
@@ -39,6 +40,10 @@ def train_transform():
         transforms.ToTensor()
     ]
     return transforms.Compose(transform_list)
+
+def set_requires_grad(nets, requires_grad=False):
+    for param in nets.parameters():
+        param.trainable = requires_grad
 
 
 class FlatFolderDataset(data.Dataset):
@@ -131,7 +136,10 @@ if __name__ == '__main__':
 
     network.train()
     network.to(device)
-
+    disc_ = Discriminator(depth=5, num_channels=32)
+    disc_.train()
+    disc_.to(device)
+    set_requires_grad(disc_, False)
     content_tf = train_transform()
     style_tf = train_transform()
 
@@ -157,26 +165,35 @@ if __name__ == '__main__':
         base_optimizer = torch.optim.Adam
         optimizer = SAM(params, base_optimizer, lr=args.lr)
         print('=> training safin')
+    opt_D = torch.optim.Adam(disc_.parameters(), lr=args.lr)
 
     for i in tqdm(range(args.max_iter)):
         adjust_learning_rate(optimizer, iteration_count=i)
         content_images = next(content_iter).to(device)
         style_images = next(style_iter).to(device)
         network.train()
-        loss_c, loss_s, style_emd, content_relt, mxdog = network(content_images, style_images)
+        g_t, loss_c, loss_s, style_emd, content_relt, mxdog, loss_Gp_GAN = network(content_images, style_images, disc_, mdog_losses=False)
         loss_c = args.content_weight * loss_c + content_relt * 16
         loss_s = args.style_weight * (loss_s + 3 * style_emd)
-        loss = loss_c + loss_s + mxdog
+        loss = loss_c + loss_s + mxdog + loss_Gp_GAN*2.5
 
         loss.backward()
         optimizer.first_step(zero_grad=True)
 
-        loss_c, loss_s, style_emd, content_relt, mxdog = network(content_images, style_images)
+        g_t, loss_c, loss_s, style_emd, content_relt, mxdog, loss_Gp_GAN = network(content_images, style_images, disc_, mdog_losses=False)
         loss_c = args.content_weight * loss_c + content_relt * 16
         loss_s = args.style_weight * (loss_s + 3 * style_emd)
-        loss = loss_c + loss_s + mxdog
+        loss = loss_c + loss_s + mxdog + loss_Gp_GAN*2.5
         loss.backward()
         optimizer.second_step(zero_grad=True)
+
+        opt_D.zero_grad()
+        set_requires_grad(disc_, True)
+        loss_D = disc_.losses(style_images.detach(), g_t.detach())
+
+        loss_D.backward()
+        opt_D.step()
+        set_requires_grad(disc_, False)
 
         writer.add_scalar('loss_content', loss_c.item(), i + 1)
         writer.add_scalar('loss_style', loss_s.item(), i + 1)
