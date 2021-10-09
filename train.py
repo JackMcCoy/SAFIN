@@ -117,7 +117,7 @@ if __name__ == '__main__':
         if 'pool' in key:
             del(vstate[key])
     vgg.load_state_dict(vstate,strict=False)
-    network = net.Net(vgg, decoder)
+    network = net.Net(vgg, decoder, mdog_losses=False)
 
     if args.start_iter > 0:
         print("Loading state after {:d} iterations".format(args.start_iter + 0))
