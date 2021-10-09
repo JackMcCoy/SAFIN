@@ -123,7 +123,7 @@ if __name__ == '__main__':
         if 'pool' in key:
             del(vstate[key])
     vgg.load_state_dict(vstate,strict=False)
-    network = net.Net(vgg, decoder, mdog_losses=False)
+    network = net.Net(vgg, decoder, mdog_losses=args.mdog_losses)
 
     if args.start_iter > 0:
         print("Loading state after {:d} iterations".format(args.start_iter + 0))
@@ -173,7 +173,7 @@ if __name__ == '__main__':
         content_images = next(content_iter).to(device)
         style_images = next(style_iter).to(device)
         network.train()
-        g_t, loss_c, loss_s, style_emd, content_relt, mxdog, loss_Gp_GAN = network(content_images, style_images, disc_, mdog_losses=args.mdog_losses)
+        g_t, loss_c, loss_s, style_emd, content_relt, mxdog, loss_Gp_GAN = network(content_images, style_images, disc_)
         loss_c = args.content_weight * loss_c + content_relt * 16
         loss_s = args.style_weight * (loss_s + 3 * style_emd)
         loss = loss_c + loss_s + mxdog + loss_Gp_GAN*2.5
@@ -181,7 +181,7 @@ if __name__ == '__main__':
         loss.backward()
         optimizer.first_step(zero_grad=True)
 
-        g_t, loss_c, loss_s, style_emd, content_relt, mxdog, loss_Gp_GAN = network(content_images, style_images, disc_, mdog_losses=args.mdog_losses)
+        g_t, loss_c, loss_s, style_emd, content_relt, mxdog, loss_Gp_GAN = network(content_images, style_images, disc_)
         loss_c = args.content_weight * loss_c + content_relt * 16
         loss_s = args.style_weight * (loss_s + 3 * style_emd)
         loss = loss_c + loss_s + mxdog + loss_Gp_GAN*2.5
