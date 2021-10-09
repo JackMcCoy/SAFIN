@@ -8,7 +8,7 @@ import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
 import torch.utils.data as data
-from sam import SAM
+#from sam import SAM
 
 from PIL import Image, ImageFile
 from tensorboardX import SummaryWriter
@@ -163,8 +163,8 @@ if __name__ == '__main__':
     if hasattr(network, 'safin4'):
         params = list(network.decoder.parameters())+list(network.safin4.parameters())+\
         list(network.safin3.parameters())
-        base_optimizer = torch.optim.Adam
-        optimizer = SAM(params, base_optimizer, lr=args.lr)
+        optimizer = torch.optim.Adam(params, lr=args.lr)
+        #optimizer = SAM(params, base_optimizer, lr=args.lr)
         print('=> training safin')
     opt_D = torch.optim.Adam(disc_.parameters(), lr=args.lr)
 
@@ -178,16 +178,9 @@ if __name__ == '__main__':
         loss_c = args.content_weight * loss_c + content_relt * 16
         loss_s = args.style_weight * (loss_s + 3 * style_emd)
         loss = loss_c + loss_s + mxdog + loss_Gp_GAN*2.5
-
+        optimizer.zero_grad()
         loss.backward()
-        optimizer.first_step(zero_grad=True)
-
-        g_t, loss_c, loss_s, style_emd, content_relt, mxdog, loss_Gp_GAN = network(content_images, style_images, disc_)
-        loss_c = args.content_weight * loss_c + content_relt * 16
-        loss_s = args.style_weight * (loss_s + 3 * style_emd)
-        loss = loss_c + loss_s + mxdog + loss_Gp_GAN*2.5
-        loss.backward()
-        optimizer.second_step(zero_grad=True)
+        optimizer.step()
 
         opt_D.zero_grad()
         set_requires_grad(disc_, True)
