@@ -97,6 +97,7 @@ if __name__ == '__main__':
     parser.add_argument('--n_threads', type=int, default=16)
     parser.add_argument('--save_model_interval', type=int, default=10000)
     parser.add_argument('--rand_seed', type=int, default=777, help='manual seed')
+    parser.add_argument('--mdog_losses', type=bool, default=True)
     parser.add_argument('--net_file', type=str,
                         choices=['wave_net'],
                         required=True,
@@ -172,7 +173,7 @@ if __name__ == '__main__':
         content_images = next(content_iter).to(device)
         style_images = next(style_iter).to(device)
         network.train()
-        g_t, loss_c, loss_s, style_emd, content_relt, mxdog, loss_Gp_GAN = network(content_images, style_images, disc_, mdog_losses=False)
+        g_t, loss_c, loss_s, style_emd, content_relt, mxdog, loss_Gp_GAN = network(content_images, style_images, disc_, mdog_losses=args.mdog_losses)
         loss_c = args.content_weight * loss_c + content_relt * 16
         loss_s = args.style_weight * (loss_s + 3 * style_emd)
         loss = loss_c + loss_s + mxdog + loss_Gp_GAN*2.5
@@ -180,7 +181,7 @@ if __name__ == '__main__':
         loss.backward()
         optimizer.first_step(zero_grad=True)
 
-        g_t, loss_c, loss_s, style_emd, content_relt, mxdog, loss_Gp_GAN = network(content_images, style_images, disc_, mdog_losses=False)
+        g_t, loss_c, loss_s, style_emd, content_relt, mxdog, loss_Gp_GAN = network(content_images, style_images, disc_, mdog_losses=args.mdog_losses)
         loss_c = args.content_weight * loss_c + content_relt * 16
         loss_s = args.style_weight * (loss_s + 3 * style_emd)
         loss = loss_c + loss_s + mxdog + loss_Gp_GAN*2.5
