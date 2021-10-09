@@ -33,10 +33,10 @@ def prepare_seed(rand_seed):
     torch.cuda.manual_seed_all(rand_seed)
 
 
-def train_transform():
+def train_transform(load_size, crop_size):
     transform_list = [
-        transforms.Resize(size=150),
-        transforms.RandomCrop(128),
+        transforms.Resize(size=load_size),
+        transforms.RandomCrop(crop_size),
         transforms.ToTensor()
     ]
     return transforms.Compose(transform_list)
@@ -103,6 +103,8 @@ if __name__ == '__main__':
                         required=True,
                         help='net file')
     parser.add_argument('--start_iter', type=int, default=0)
+    parser.add_argument('--load_size', type=int, default=150)
+    parser.add_argument('--crop_size', type=int, default=128)
     args = parser.parse_args()
     prepare_seed(args.rand_seed)
 
@@ -141,8 +143,8 @@ if __name__ == '__main__':
     disc_.train()
     disc_.to(device)
     set_requires_grad(disc_, False)
-    content_tf = train_transform()
-    style_tf = train_transform()
+    content_tf = train_transform(args.load_size, args.crop_size)
+    style_tf = train_transform(args.load_size, args.crop_size)
 
     assert os.path.exists(args.content_dir), args.content_dir
     assert os.path.exists(args.style_dir), args.style_dir
