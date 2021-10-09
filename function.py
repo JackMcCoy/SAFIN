@@ -183,7 +183,7 @@ class GANLoss(nn.Module):
 
 
 class Discriminator(nn.Module):
-    def __init__(self, depth=5, num_channels=64):
+    def __init__(self, depth=5, num_channels=64, device=None):
         super(Discriminator, self).__init__()
         self.head = nn.Sequential(
             nn.Conv2d(3,num_channels,3,stride=1,padding=1),
@@ -206,7 +206,8 @@ class Discriminator(nn.Module):
                               kernel_size=3,
                               stride=1,
                               padding=1)
-        self.ganloss = GANLoss('lsgan')
+        self.device = device
+        self.ganloss = GANLoss('lsgan', self.device)
 
     def losses(self, real, fake):
         pred_real = self(real)
