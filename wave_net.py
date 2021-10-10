@@ -222,9 +222,8 @@ class Net(nn.Module):
         loss_s = self.calc_style_loss(g_t_feats[0], style_feats[0])
         for i in range(1, 4):
             loss_s += self.calc_style_loss(g_t_feats[i], style_feats[i])
-        style_emd = self.calc_style_emd_loss(g_t_feats[-2],style_feats[-2]) + \
-                    self.calc_style_emd_loss(g_t_feats[-1], style_feats[-1])
-        content_relt = self.calc_content_relt_loss(g_t_feats[-1], content_feat[-1])
+        style_emd = 0
+        content_relt = 0
 
         if self.mdog_losses:
             print("calculating mdog loss")
