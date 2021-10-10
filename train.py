@@ -97,7 +97,7 @@ if __name__ == '__main__':
     parser.add_argument('--n_threads', type=int, default=16)
     parser.add_argument('--save_model_interval', type=int, default=10000)
     parser.add_argument('--rand_seed', type=int, default=777, help='manual seed')
-    parser.add_argument('--mdog_losses', type=bool, default=True)
+    parser.add_argument('--mdog_losses', type=eval, default=True)
     parser.add_argument('--net_file', type=str,
                         choices=['wave_net'],
                         required=True,
