@@ -141,10 +141,6 @@ if __name__ == '__main__':
 
     network.train()
     network.to(device)
-    disc_ = Discriminator(depth=5, num_channels=64, device=device)
-    disc_.train()
-    disc_.to(device)
-    set_requires_grad(disc_, False)
     content_tf = train_transform(args.load_size, args.crop_size)
     style_tf = train_transform(args.load_size, args.crop_size)
 
@@ -178,20 +174,13 @@ if __name__ == '__main__':
         content_images = next(content_iter).to(device)
         style_images = next(style_iter).to(device)
         network.train()
-        g_t, loss_c, loss_s, style_emd, content_relt, mxdog, loss_Gp_GAN = network(content_images, style_images, disc_)
+        g_t, loss_c, loss_s, style_emd, content_relt, mxdog = network(content_images, style_images)
         loss_c = args.content_weight * loss_c + content_relt * 16
         loss_s = args.style_weight * (loss_s + 3 * style_emd)
-        loss = loss_c + loss_s + mxdog + loss_Gp_GAN*2.5
+        loss = loss_c + loss_s + mxdog
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
-        set_requires_grad(disc_, True)
-        loss_D = disc_.losses(style_images.detach(), g_t.detach())
-        opt_D.zero_grad()
-        loss_D.backward()
-        opt_D.step()
-        set_requires_grad(disc_, False)
 
         writer.add_scalar('loss_content', loss_c.item(), i + 1)
         writer.add_scalar('loss_style', loss_s.item(), i + 1)
