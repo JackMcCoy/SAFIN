@@ -186,10 +186,9 @@ if __name__ == '__main__':
         loss.backward()
         optimizer.step()
 
-        opt_D.zero_grad()
         set_requires_grad(disc_, True)
         loss_D = disc_.losses(style_images.detach(), g_t.detach())
-
+        opt_D.zero_grad()
         loss_D.backward()
         opt_D.step()
         set_requires_grad(disc_, False)
