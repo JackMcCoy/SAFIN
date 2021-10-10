@@ -112,6 +112,7 @@ class WaveDecoder(nn.Module):
         self.conv2_1 = nn.Conv2d(128, 64, 3, 1, 0)
 
         self.recon_block1 = WaveUnpool(64)
+        self.conv1_3 = nn.Conv2d(64, 64, 3, 1, 0)
         self.conv1_2 = nn.Conv2d(64, 64, 3, 1, 0)
         self.conv1_1 = nn.Conv2d(64, 3, 3, 1, 0)
 
@@ -135,10 +136,11 @@ class WaveDecoder(nn.Module):
             out = self.relu(self.conv2_1(self.pad(x)))
             lh, hl, hh = skips['pool1']
             out = self.recon_block1(out, lh, hl, hh)
-            return self.relu(self.conv1_2(self.pad(out)))
+            return self.relu(self.conv1_3(self.pad(out)))
 
         else:
-            return self.conv1_1(self.pad(x))
+            out = self.relu(self.conv1_2(self.pad(x)))
+            return self.conv1_1(self.pad(out))
 
     def forward(self, x, skips):
         for level in [4, 3, 2, 1]:
