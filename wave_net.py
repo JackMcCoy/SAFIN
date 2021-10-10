@@ -227,7 +227,7 @@ class Net(nn.Module):
         content_relt = self.calc_content_relt_loss(g_t_feats[-1], content_feat[-1])
 
         if self.mdog_losses:
-	        print("calculating mdog loss")
+            print("calculating mdog loss")
             cX, _ = xdog(content.detach(), gaus_1, gaus_2, morph, gamma=.9, morph_cutoff=8.85, morphs=1)
             sX, _ = xdog(style.detach(), gaus_1, gaus_2, morph, gamma=.9, morph_cutoff=8.85, morphs=1)
             cXF = self.encoder(cX)
