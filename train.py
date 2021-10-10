@@ -166,7 +166,6 @@ if __name__ == '__main__':
         optimizer = torch.optim.Adam(params, lr=args.lr)
         #optimizer = SAM(params, base_optimizer, lr=args.lr)
         print('=> training safin')
-    opt_D = torch.optim.Adam(disc_.parameters(), lr=args.lr)
 
     for i in tqdm(range(args.max_iter)):
         adjust_learning_rate(optimizer, iteration_count=i)
