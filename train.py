@@ -97,7 +97,9 @@ if __name__ == '__main__':
     parser.add_argument('--n_threads', type=int, default=16)
     parser.add_argument('--save_model_interval', type=int, default=10000)
     parser.add_argument('--rand_seed', type=int, default=777, help='manual seed')
-    parser.add_argument('--mdog_losses', dest='feature', action='store_true')
+    parser.add_argument('--mdog_losses', dest='mdog_losses', action='store_true')
+    parser.add_argument('--no_mdog_losses', dest='mdog_losses', action='store_false')
+    parser.set_defaults(mdog_losses=False)
     parser.add_argument('--net_file', type=str,
                         choices=['wave_net'],
                         required=True,
@@ -107,9 +109,6 @@ if __name__ == '__main__':
     parser.add_argument('--crop_size', type=int, default=128)
     args = parser.parse_args()
     prepare_seed(args.rand_seed)
-
-    if not args.mdog_losses:
-        args.mdog_losses = False
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     save_dir = Path(str(args.save_dir) + str(args.net_file) + '_' + str(args.max_iter))
