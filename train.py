@@ -108,7 +108,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     prepare_seed(args.rand_seed)
 
-    if not mdog_losses:
+    if not args.mdog_losses:
         args.mdog_losses = False
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
