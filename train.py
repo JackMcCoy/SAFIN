@@ -169,7 +169,6 @@ if __name__ == '__main__':
 
     for i in tqdm(range(args.max_iter)):
         adjust_learning_rate(optimizer, iteration_count=i)
-        adjust_learning_rate(opt_D, iteration_count=i)
         content_images = next(content_iter).to(device)
         style_images = next(style_iter).to(device)
         network.train()
