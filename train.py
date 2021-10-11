@@ -37,6 +37,7 @@ def train_transform(load_size, crop_size):
     transform_list = [
         transforms.Resize(size=load_size),
         transforms.RandomCrop(crop_size),
+        transforms.RandomHorizontalFlip(p=0.5),
         transforms.ToTensor()
     ]
     return transforms.Compose(transform_list)
